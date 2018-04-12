@@ -13,32 +13,33 @@ You will find the different Terraform modules under the folder [modules](/module
 ![infra design](/img/infra_diagram.png)
 
 #### Pre Requirements:
-Install Google SDK [https://cloud.google.com/sdk/] and login to retrive your credentials
+- Google SDK [https://cloud.google.com/sdk/] and login to retrive your credentials
 ```
 gcloud auth login
 ```
 
+- helm [https://github.com/kubernetes/helm]
+- helm template [https://github.com/technosophos/helm-template]
+```
+helm plugin install https://github.com/technosophos/helm-template
+```
+- Terraform [https://www.terraform.io/]
 
 
 In Google Cloud Platform create a project, for example named `administration`, and create a Browser bucket. This bucket is needed to store the Terraform states. Edit the different references of the bucket named `terraform-states-battlesnakeio` in the code with the name of your bucket.
-
-<!-- TODO create the battlesnake script -->
-<!-- If you are going to deploy locally or without using the main script `./battlesnake` you will need the following tools installed on your computer:
-- helm [https://github.com/kubernetes/helm]
-- Terraform [https://www.terraform.io/] -->
 
 
 #### Needs to be apply on the GKE cluster:
 
 Open a terminal where you have kubectl and your gke credentials installed:
 
-This is to allow to create RBAC features:
+This is to allow the creation of RBAC features:
 ```
 kubectl create clusterrolebinding cluster-admin-binding \
     --clusterrole cluster-admin --user $(gcloud config get-value account
 ```
 
-If you are going to use helm and Tiller to deploy kubernetes charts and manifests you will need to do the 3 next commands:
+If you are going to use helm and Tiller to deploy kubernetes charts and manifests you will need to pass the 3 next commands:
 ```
 kubectl create serviceaccount --namespace kube-system tiller
 ```
