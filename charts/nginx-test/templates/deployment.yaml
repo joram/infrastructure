@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-test
+  namespace: default
+  labels:
+    version: "{{ .Chart.Version }}"
+spec:
+  selector:
+    matchLabels:
+      app: nginx-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-test
+        version: "{{ .Chart.Version }}"
+    spec:
+      containers:
+      - name: nginx-test
+        image: nginx:{{ .Values.image.tag }}
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+        resources:
+          limits:
+            cpu: 200m
+            memory: 200M
+          requests:
+            cpu: 200m
+            memory: 200M
