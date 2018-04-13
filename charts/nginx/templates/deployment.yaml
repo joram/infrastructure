@@ -1,0 +1,57 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: default
+  labels:
+    version: "{{ .Chart.Version }}"
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx
+        version: "{{ .Chart.Version }}"
+    spec:
+      containers:
+      - name: nginx
+        image: ahromis/nginx-ssl:{{ .Values.image.tag }}
+        ports:
+        volumeMounts:
+        - name: nginx-{{$v := .Values.domain | split "." }}{{$v._0}}-{{$v := .Values.domain | split "." }}{{$v._1}}-tls
+          mountPath: /etc/nginx/ssl/
+          readOnly: true
+        ports:
+        - name: nginx
+          containerPort: 443
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 443
+            scheme: HTTPS
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 443
+            scheme: HTTPS
+        resources:
+          limits:
+            cpu: 200m
+            memory: 200M
+          requests:
+            cpu: 200m
+            memory: 200M
+      volumes:
+        - name: nginx-{{$v := .Values.domain | split "." }}{{$v._0}}-{{$v := .Values.domain | split "." }}{{$v._1}}-tls
+          secret:
+            secretName: nginx-{{$v := .Values.domain | split "." }}{{$v._0}}-{{$v := .Values.domain | split "." }}{{$v._1}}-tls
+            items:
+              - key: key.pem
+                path: privkey.pem
+              - key: fullchain.pem
+                path: fullchain.pem
+              - key: chain.pem
+                path: chain.pem

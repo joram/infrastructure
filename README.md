@@ -30,9 +30,6 @@ helm plugin install https://github.com/technosophos/helm-template
 
 - In Google Cloud Platform create a project, for example named `administration`, and create a Browser bucket. This bucket is needed to store the Terraform states. Edit the different references of the bucket named `terraform-states-battlesnakeio` in the code with the name of your bucket.
 
-- A wildcard certificate, you can get one for free with [Let's Encrypt](https://letsencrypt.org/)
-
-
 #### Deploy the infrastructure in your Google Cloud Platform account
 We will now start the deployment of the infrastructure with the Terraform code.
 
@@ -46,35 +43,44 @@ We will now start the deployment of the infrastructure with the Terraform code.
 - Do the same steps than step 1 in the folder [/gcp/k8s](/gcp/k8s)
 
 - In Google Cloud Platform, go to Kubernetes Engine and click on connect to get the shell command to setup the authentication to your newly created cluster, this should look something like this:
+
 ```
 export CLOUDSDK_CONTAINER_USE_V1_API_CLIENT=false && export CLOUDSDK_CONTAINER_USE_V1_API=false && gcloud beta container clusters get-credentials battlesnake-k8s-gke --region us-west1 --project battlesnake-123456
 ```
 
 - This is to allow the creation of RBAC features:
+
 ```
 kubectl create clusterrolebinding cluster-admin-binding \
     --clusterrole cluster-admin --user $(gcloud config get-value account)
 ```
+```
+kubectl create clusterrolebinding --user system:serviceaccount:kube-system:default \
+    kube-system-cluster-admin --clusterrole cluster-admin
+```
 
 - In Google Cloud Platform, go to Cloud DNS and Create a new zone with the domain that you want to use. Follow the Cloud DNS instruction to setup your registar. We need this only if we want to use the external-dns feature of Kubernetes, which will create automaticly DNS records based on either an annotation for a service in k8s or by the host value in an ingress.
 
-- In Google Cloud Platform, go to Network services, Load balancing, click on advanced menu, Certificates. We will now add the wilcard certificate.
-
-Now that the terraform infrastructure is deployed we will deploy the last part of the infrastructure, external-dns:
+Now that the terraform infrastructure is deployed we will deploy the last parts of the infrastructure:
 
 - Go to the folder [/charts](/charts), and do
 ```
 helm template --set domain=yourdomain.com,googleProjectId=yourgoogleprojectid external-dns | kubectl apply -f -
 ```
+
+```
+helm template lets-encrypt | kubectl
+```
+
 #### Deploy the nginx-test helm chart to test the all setup
 
-Go to the folder [/charts](/charts), the certificateName is the one you gave to the wilcard certificate in Google Cloud Platform in the previous steps:
+Go to the folder [/charts](/charts):
 ```
-helm template --set domain=yourdomain.com,certificateName=wilcard-yourdomain nginx-test | kubectl apply -f -
+helm template --set domain=yourdomain.com nginx | kubectl apply -f -
 ```
 It can take up to 10 mins for all the ressources to get created.
 
-Check if everything is working at https://test.yourdomain.com
+Check if everything is working at https://nginx.yourdomain.com
 
 #### Needs to be apply on the GKE cluster if you want to use helm with Tiller:
 
