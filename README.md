@@ -18,6 +18,8 @@ You will find the different Terraform modules under the folder [modules](/module
 gcloud auth login
 ```
 
+- kubectl [https://kubernetes.io/docs/tasks/tools/install-kubectl/]
+
 - helm [https://github.com/kubernetes/helm]
 - helm template [https://github.com/technosophos/helm-template]
 ```
@@ -26,20 +28,58 @@ helm plugin install https://github.com/technosophos/helm-template
 - Terraform [https://www.terraform.io/]
 
 
-In Google Cloud Platform create a project, for example named `administration`, and create a Browser bucket. This bucket is needed to store the Terraform states. Edit the different references of the bucket named `terraform-states-battlesnakeio` in the code with the name of your bucket.
+- In Google Cloud Platform create a project, for example named `administration`, and create a Browser bucket. This bucket is needed to store the Terraform states. Edit the different references of the bucket named `terraform-states-battlesnakeio` in the code with the name of your bucket.
+
+- A wildcard certificate, you can get one for free with [Let's Encrypt](https://letsencrypt.org/)
 
 
-#### Needs to be apply on the GKE cluster:
+#### Deploy the infrastructure in your Google Cloud Platform account
+We will now start the deployment of the infrastructure with the Terraform code.
+
+- In a shell, go to the folder [/gcp/base](/gcp/base) and do a `terraform init`. This will fetch the modules in the [/modules/gcp](/modules/gcp) folder and initialize the bucket backend. Now do a `terraform apply`, it will generate a plan of the actions that will take place and will ask if yes or no you wan to apply those changes. If you are ok with the changes answer yes and wait until Terraform finish to create the ressources.
+
+- In Google Cloud Platform, go to Compute Engine, under metadata click on SSH Keys and add a ssh key that will be applied to all the instances at the project level
+
+- Do the same steps than step 1 in the folder [/gcp/network](/gcp/network)
+
+
+- Do the same steps than step 1 in the folder [/gcp/k8s](/gcp/k8s)
+
+- In Google Cloud Platform, go to Kubernetes Engine and click on connect to get the shell command to setup the authentication to your newly created cluster, this should look something like this:
+```
+export CLOUDSDK_CONTAINER_USE_V1_API_CLIENT=false && export CLOUDSDK_CONTAINER_USE_V1_API=false && gcloud beta container clusters get-credentials battlesnake-k8s-gke --region us-west1 --project battlesnake-123456
+```
+
+- This is to allow the creation of RBAC features:
+```
+kubectl create clusterrolebinding cluster-admin-binding \
+    --clusterrole cluster-admin --user $(gcloud config get-value account)
+```
+
+- In Google Cloud Platform, go to Cloud DNS and Create a new zone with the domain that you want to use. Follow the Cloud DNS instruction to setup your registar. We need this only if we want to use the external-dns feature of Kubernetes, which will create automaticly DNS records based on either an annotation for a service in k8s or by the host value in an ingress.
+
+- In Google Cloud Platform, go to Network services, Load balancing, click on advanced menu, Certificates. We will now add the wilcard certificate.
+
+Now that the terraform infrastructure is deployed we will deploy the last part of the infrastructure, external-dns:
+
+- Go to the folder [/charts](/charts), and do
+```
+helm template --set domain=yourdomain.com,googleProjectId=yourgoogleprojectid external-dns | kubectl apply -f -
+```
+#### Deploy the nginx-test helm chart to test the all setup
+
+Go to the folder [/charts](/charts), the certificateName is the one you gave to the wilcard certificate in Google Cloud Platform in the previous steps:
+```
+helm template --set domain=yourdomain.com,certificateName=wilcard-yourdomain nginx-test | kubectl apply -f -
+```
+It can take up to 10 mins for all the ressources to get created.
+
+Check if everything is working at https://test.yourdomain.com
+
+#### Needs to be apply on the GKE cluster if you want to use helm with Tiller:
 
 Open a terminal where you have kubectl and your gke credentials installed:
 
-This is to allow the creation of RBAC features:
-```
-kubectl create clusterrolebinding cluster-admin-binding \
-    --clusterrole cluster-admin --user $(gcloud config get-value account
-```
-
-If you are going to use helm and Tiller to deploy kubernetes charts and manifests you will need to pass the 3 next commands:
 ```
 kubectl create serviceaccount --namespace kube-system tiller
 ```

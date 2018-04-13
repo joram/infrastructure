@@ -4,7 +4,7 @@ metadata:
   name: nginx-test
   namespace: default
   annotations:
-    ingress.gcp.kubernetes.io/pre-shared-cert: "wilcard-frenchtouchprod"
+    ingress.gcp.kubernetes.io/pre-shared-cert: "{{ .Values.certificateName }}"
     ingress.kubernetes.io/ssl-redirect: "true"
     kubernetes.io/ingress.allow-http: "false"
 spec:
