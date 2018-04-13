@@ -11,3 +11,4 @@ subjects:
 - kind: ServiceAccount
   name: external-dns
   namespace: kube-system
+  

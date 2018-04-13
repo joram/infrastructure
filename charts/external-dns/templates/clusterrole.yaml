@@ -10,3 +10,4 @@ rules:
 - apiGroups: ["extensions"] 
   resources: ["ingresses"] 
   verbs: ["get","watch","list"]
+  
