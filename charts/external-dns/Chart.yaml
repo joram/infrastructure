@@ -1,6 +1,0 @@
-apiVersion: v1
-name: external-dns
-home: https://github.com/kubernetes-incubator/external-dns
-version: 1.0.0
-description: 
-icon: https://raw.githubusercontent.com/kubernetes-incubator/external-dns/master/img/external-dns.png

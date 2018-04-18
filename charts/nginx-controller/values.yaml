@@ -1,0 +1,4 @@
+images:
+    tag:
+        defaultBackend: 1.4
+        nginxController: 0.13.0
