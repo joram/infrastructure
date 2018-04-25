@@ -3,7 +3,7 @@ battlesnake infrastructure
 
 #### infrastructure design:
 
-The Battlesnake infrastructure is designed around Google Cloud Platform and Terraform.
+The Battlesnake infrastructure is designed around Google Cloud Platform, Terraform, Kubernetes and Docker.
 
 We tried to stay simple and to leverage Google Cloud Platform products.
 
@@ -21,6 +21,7 @@ gcloud auth login
 - kubectl [https://kubernetes.io/docs/tasks/tools/install-kubectl/]
 
 - helm [https://github.com/kubernetes/helm]
+
 - helm template [https://github.com/technosophos/helm-template]
 ```
 helm plugin install https://github.com/technosophos/helm-template
@@ -28,21 +29,20 @@ helm plugin install https://github.com/technosophos/helm-template
 - Terraform [https://www.terraform.io/]
 
 
-- In Google Cloud Platform create a project, for example named `administration`, and create a Browser bucket. This bucket is needed to store the Terraform states. Edit the different references of the bucket named `terraform-states-battlesnakeio` in the code with the name of your bucket.
+- In Google Cloud Platform create a project, for example named `battlesnake-io`, and create a Browser bucket name `terraform-states-battlesnakeio`. This bucket is needed to store the Terraform states. 
 
-- In the same project create a Service Account, and give it the Organization Administrator and Owner.
+- In the same project create a Service Account, and give it the Project Owner rights.
 
 #### Deploy the infrastructure in your Google Cloud Platform account
-We will now start the deployment of the infrastructure with the Terraform code.
-
-- In a shell, go to the folder [/gcp/us-west1/production/base](/gcp/us-west1/production/base) and do a `terraform init`. This will fetch the modules in the [/modules/gcp](/modules/gcp) folder and initialize the bucket backend. Now do a `terraform apply`, it will generate a plan of the actions that will take place and will ask if yes or no you wan to apply those changes. If you are ok with the changes answer yes and wait until Terraform finish to create the ressources.
+We will now start the deployment of the infrastructure with the Terraform code. In a existing project:
 
 - In Google Cloud Platform, go to Compute Engine, under metadata click on SSH Keys and add a ssh key that will be applied to all the instances at the project level.
 
-- Do the same steps than step 1 in the folder [/gcp/us-west1/production/network](/gcp/us-west1/production/network).
+- In a shell, go to the folder [/gcp/us-west1/production/base](/gcp/us-west1/production/base) and do a `terraform init`. This will fetch the modules in the [/modules/gcp](/modules/gcp) folder and initialize the bucket backend. Now do a `terraform apply`, it will generate a plan of the actions that will take place and will ask if yes or no you wan to apply those changes. If you are ok with the changes answer yes and wait until Terraform finish to create the ressources.
 
+- Do the same steps than previously in the folder [/gcp/us-west1/production/network](/gcp/us-west1/production/network).
 
-- Do the same steps than step 1 in the folder [/gcp/us-west1/production/k8s](/gcp/us-west1/production/k8s).
+- Do the same steps than previously in the folder [/gcp/us-west1/production/k8s](/gcp/us-west1/production/k8s).
 
 - In Google Cloud Platform, go to Kubernetes Engine and click on connect to get the shell command to setup the authentication to your newly created cluster, this should look something like this:
 
@@ -88,14 +88,14 @@ helm install --name nginx-controller nginx-controller --namespace kube-system
 
 - We need to deploy external-dns to manage our dns entries automaticly:
 ```
-helm install --name external-dns stable/external-dns --namespace kube-system --set google.project=yourgoogleprojectid,provider=google,domain-filter=yourdomain.com,source=ingress,registry=txt,txt-owner-id=my-identifier,policy=sync
+helm install --name external-dns stable/external-dns --namespace kube-system --set google.project=battlesnake-io,provider=google,domain-filter=battlesnak.io,source=ingress,registry=txt,txt-owner-id=battlesnake-io,policy=sync
 ```
 
 - We now deploy cert-manager which will generate lets encrypt certificate and manage their lifecycle:
 ```
 helm install --name cert-manager stable/cert-manager --namespace kube-system --set ingressShim.extraArgs='{--default-issuer-name=letsencrypt-prod,--default-issuer-kind=ClusterIssuer}'
 ```
-Go to the charts folder change the email value in the file `clusterissuer.yaml` then do:
+Go to the cert-manager folder in charts then do:
 ```
 kubectl apply -f clusterissuer.yaml
 ```

@@ -4,12 +4,13 @@ provider "google" {
 
 terraform {
   backend "gcs" {
-    bucket = "terraform-states-battlesnakeio" # Need to be change for your infra
+    bucket = "terraform-states-battlesnakeio"
     prefix = "battlesnake/base"
   }
+  required_version = "= 0.11.7"
 }
 
 module "project" {
-  source     = "../../modules/gcp/project"
-  org_domain = "battlesnake.io"            # Need to be change for your project
+  source  = "../../../../modules/gcp/project"
+  project = "battlesnake-io"
 }

@@ -4,21 +4,13 @@ provider "google" {
 
 terraform {
   backend "gcs" {
-    bucket = "terraform-states-battlesnakeio" # Need to be change for your infra
+    bucket = "terraform-states-battlesnakeio"
     prefix = "battlesnake/network"
   }
-}
-
-data "terraform_remote_state" "base" {
-  backend = "gcs"
-
-  config {
-    bucket = "terraform-states-battlesnakeio" # Need to be change for your infra
-    prefix = "battlesnake/base"
-  }
+  required_version = "= 0.11.7"
 }
 
 module "network" {
-  source  = "../../modules/gcp/network"
-  project = "${data.terraform_remote_state.base.project_id}"
+  source  = "../../../../modules/gcp/network"
+  project = "battlesnake-io"
 }

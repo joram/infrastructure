@@ -1,3 +1,3 @@
-variable "org_domain" {
-  description = "The domain name of the Organization"
+variable "project" {
+  description = "The ID of the project in which the resource belongs"
 }

@@ -17,3 +17,7 @@ variable "machine_type" {
 variable "disk_size_gb" {
   description = "Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB"
 }
+
+variable "min_nodes_version" {
+  description = "The Kubernetes version for the nodes in this pool"
+}

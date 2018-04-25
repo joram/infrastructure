@@ -1,25 +1,6 @@
-data "google_organization" "org" {
-  domain = "${var.org_domain}"
-}
-
-data "google_billing_account" "acct" {
-  display_name = "My Billing Account"
-  open         = true
-}
-
-resource "random_id" "battlesnake" {
-  byte_length = 3
-}
-
-resource "google_project" "battlesnake" {
-  name            = "battlesnake"
-  project_id      = "battlesnake-${random_id.battlesnake.dec}"
-  org_id          = "${data.google_organization.org.id}"
-  billing_account = "${data.google_billing_account.acct.id}"
-}
-
+# Enable all the APIs needed in the project
 resource "google_project_services" "battlesnake" {
-  project = "${google_project.battlesnake.project_id}"
+  project = "${var.project}"
 
   services = [
     "compute.googleapis.com",
