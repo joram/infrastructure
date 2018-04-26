@@ -29,7 +29,7 @@ helm plugin install https://github.com/technosophos/helm-template
 - Terraform [https://www.terraform.io/]
 
 
-- In Google Cloud Platform create a project, for example named `battlesnake-io`, and create a Browser bucket name `terraform-states-battlesnakeio`. This bucket is needed to store the Terraform states. 
+- In Google Cloud Platform create a project, for example named `battlesnake-io`, and create a Browser bucket name `terraform-battlesnake-io`. This bucket is needed to store the Terraform states. 
 
 - In the same project create a Service Account, and give it the Project Owner rights.
 

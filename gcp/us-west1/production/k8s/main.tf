@@ -4,7 +4,7 @@ provider "google" {
 
 terraform {
   backend "gcs" {
-    bucket = "terraform-states-battlesnakeio"
+    bucket = "terraform-battlesnake-io"
     prefix = "battlesnake/k8s"
   }
   required_version = "= 0.11.7"
