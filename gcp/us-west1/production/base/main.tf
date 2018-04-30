@@ -7,6 +7,7 @@ terraform {
     bucket = "terraform-battlesnake-io"
     prefix = "battlesnake/base"
   }
+
   required_version = "= 0.11.7"
 }
 
