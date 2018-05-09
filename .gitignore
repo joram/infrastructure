@@ -1,0 +1,6 @@
+.terraform
+.DS_Store
+errored.tfstate
+.vscode
+*.tfstate
+*.backup
