@@ -13,7 +13,7 @@ terraform {
 
 module "k8s" {
   source             = "../../../../modules/gcp/k8s"
-  projects           = "battlesnake-io"
+  project            = "battlesnake-io"
   region             = "us-west1"
   min_master_version = "1.9.6-gke.1"
   min_nodes_version  = "1.9.6-gke.1"
