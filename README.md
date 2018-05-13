@@ -88,9 +88,9 @@ kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"templat
 helm install --name nginx-controller nginx-controller --namespace kube-system
 ```
 
-- We need to deploy external-dns to manage our dns entries automaticly:
+- We need to deploy external-dns to manage our dns entries automatically:
 ```
-helm install --name external-dns stable/external-dns --namespace kube-system --set google.project=battlesnake-io,provider=google,domain-filter=battlesnak.io,source=ingress,registry=txt,txt-owner-id=battlesnake-io,policy=sync
+helm install --name external-dns stable/external-dns --namespace kube-system --set google.project=battlesnake-io,provider=google,domain-filter=battlesnake.io,source=ingress,registry=txt,txt-owner-id=battlesnake-io,policy=sync
 ```
 
 - We now deploy cert-manager which will generate lets encrypt certificate and manage their lifecycle:
