@@ -37,6 +37,7 @@ helm plugin install https://github.com/technosophos/helm-template
 We will now start the deployment of the infrastructure with the Terraform code. In a existing project:
 
 - In Google Cloud Platform, go to Compute Engine, under metadata click on SSH Keys and add a ssh key that will be applied to all the instances at the project level.
+- setup application default credentials `gcloud auth application-default login`
 
 - In a shell, go to the folder [/gcp/us-west1/production/base](/gcp/us-west1/production/base) and do a `terraform init`. This will fetch the modules in the [/modules/gcp](/modules/gcp) folder and initialize the bucket backend. Now do a `terraform apply`, it will generate a plan of the actions that will take place and will ask if yes or no you wan to apply those changes. If you are ok with the changes answer yes and wait until Terraform finish to create the ressources.
 
@@ -72,12 +73,13 @@ kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admi
 ```
 
 ```
-kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+helm init
 ```
 
 ```
-helm init
+kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
 ```
+
 
 - In Google Cloud Platform, go to Cloud DNS and Create a new zone with the domain that you want to use. Follow the Cloud DNS instruction to setup your registar. We need this only if we want to use the external-dns feature of Kubernetes, which will create automaticly DNS records based on either an annotation for a service in k8s or by the host value in an ingress.
 
@@ -86,9 +88,9 @@ helm init
 helm install --name nginx-controller nginx-controller --namespace kube-system
 ```
 
-- We need to deploy external-dns to manage our dns entries automaticly:
+- We need to deploy external-dns to manage our dns entries automatically:
 ```
-helm install --name external-dns stable/external-dns --namespace kube-system --set google.project=battlesnake-io,provider=google,domain-filter=battlesnak.io,source=ingress,registry=txt,txt-owner-id=battlesnake-io,policy=sync
+helm install --name external-dns stable/external-dns --namespace kube-system --set google.project=battlesnake-io,provider=google,domain-filter=battlesnake.io,source=ingress,registry=txt,txt-owner-id=battlesnake-io,policy=sync
 ```
 
 - We now deploy cert-manager which will generate lets encrypt certificate and manage their lifecycle:
