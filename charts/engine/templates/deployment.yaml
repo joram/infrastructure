@@ -1,0 +1,26 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: engine
+  namespace: default
+  labels:
+    app: engine
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: engine
+  template:
+    metadata:
+      labels:
+        app: engine
+    spec:
+      containers:
+      - name: engine
+        image: battlesnakeio/engine:latest
+        command: ["/bin/engine"]
+        args: [ "server", "-l", ":3002", "-t", "100"]
+        ports:
+        - containerPort: 3002
