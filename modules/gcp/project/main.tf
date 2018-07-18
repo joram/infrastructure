@@ -16,5 +16,6 @@ resource "google_project_services" "battlesnake" {
     "replicapoolupdater.googleapis.com",
     "resourceviews.googleapis.com",
     "storage-api.googleapis.com",
+    "oslogin.googleapis.com",
   ]
 }

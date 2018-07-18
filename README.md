@@ -39,17 +39,21 @@ We will now start the deployment of the infrastructure with the Terraform code. 
 - In Google Cloud Platform, go to Compute Engine, under metadata click on SSH Keys and add a ssh key that will be applied to all the instances at the project level.
 - setup application default credentials `gcloud auth application-default login`
 
-- In a shell, go to the folder [/gcp/us-west1/production/base](/gcp/us-west1/production/base) and do a `terraform init`. This will fetch the modules in the [/modules/gcp](/modules/gcp) folder and initialize the bucket backend. Now do a `terraform apply`, it will generate a plan of the actions that will take place and will ask if yes or no you wan to apply those changes. If you are ok with the changes answer yes and wait until Terraform finish to create the ressources.
+- In a shell, go to the folder [/gcp/us-west1/production/base](gcp/us-west1/production/base) and do a `terraform init`. This will fetch the modules in the [/modules/gcp](modules/gcp) folder and initialize the bucket backend. Now do a `terraform apply`, it will generate a plan of the actions that will take place and will ask if yes or no you wan to apply those changes. If you are ok with the changes, answer yes and wait until Terraform finishes creating the resources.
 
-- Do the same steps than previously in the folder [/gcp/us-west1/production/network](/gcp/us-west1/production/network).
-
-- Do the same steps than previously in the folder [/gcp/us-west1/production/k8s](/gcp/us-west1/production/k8s).
+- Do the same steps than previously in the folders:
+    - [/gcp/us-west1/production/network](gcp/us-west1/production/network)
+    - [/gcp/us-west1/production/k8s](gcp/us-west1/production/k8s)
 
 - In Google Cloud Platform, go to Kubernetes Engine and click on connect to get the shell command to setup the authentication to your newly created cluster, this should look something like this:
 
 ```
 export CLOUDSDK_CONTAINER_USE_V1_API_CLIENT=false && export CLOUDSDK_CONTAINER_USE_V1_API=false && gcloud beta container clusters get-credentials battlesnake-k8s-gke --region us-west1 --project battlesnake-123456
 ```
+
+-  Do a `terraform init` and `terraform apply` in the following folders:
+    - [/gcp/us-west1/production/sql](gcp/us-west1/production/sql) 
+    - [/gcp/us-west1/production/k8s_secrets](gcp/us-west1/production/k8s_secrets)
 
 - We are now setting up RBAC resources:
 

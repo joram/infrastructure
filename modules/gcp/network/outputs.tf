@@ -14,10 +14,18 @@ output "private_subnetwork_name" {
   value = "${google_compute_subnetwork.battlesnake-private.name}"
 }
 
+output "private_subnetwork_cidr" {
+  value = "${google_compute_subnetwork.battlesnake-private.ip_cidr_range}"
+}
+
 output "public_subnetwork_self_link" {
   value = "${google_compute_subnetwork.battlesnake-public.self_link}"
 }
 
 output "public_subnetwork_name" {
   value = "${google_compute_subnetwork.battlesnake-public.name}"
+}
+
+output "public_subnetwork_cidr" {
+  value = "${google_compute_subnetwork.battlesnake-public.ip_cidr_range}"
 }

@@ -14,10 +14,18 @@ output "private_subnetwork_name" {
   value = "${module.network.private_subnetwork_name}"
 }
 
+output "private_subnetwork_cidr" {
+  value = "${module.network.private_subnetwork_cidr}"
+}
+
 output "public_subnetwork_self_link" {
   value = "${module.network.public_subnetwork_self_link}"
 }
 
 output "public_subnetwork_name" {
   value = "${module.network.public_subnetwork_name}"
+}
+
+output "public_subnetwork_cidr" {
+  value = "${module.network.public_subnetwork_cidr}"
 }
