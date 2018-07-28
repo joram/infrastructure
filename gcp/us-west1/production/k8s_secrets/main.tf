@@ -55,3 +55,17 @@ resource "kubernetes_secret" "cloudsql-play-db-config" {
     instance_name     = "${data.terraform_remote_state.sql.instance_name}"
   }
 }
+
+resource "random_id" "battlesnake-secret" {
+  byte_length = 32
+}
+
+resource "kubernetes_secret" "battlesnake-secret" {
+  metadata {
+    name              = "battlesnake-secret"
+    namespace         = "default"
+  }
+  data {
+    secret   = "${random_id.battlesnake-secret.hex}"
+  }
+}

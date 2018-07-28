@@ -1,0 +1,25 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: board
+  namespace: default
+  labels:
+    app: board
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: board
+  template:
+    metadata:
+      labels:
+        app: board
+    spec:
+      containers:
+      - name: board
+        image: battlesnakeio/board:latest
+        ports:
+        - containerPort: 80
+
