@@ -1,0 +1,83 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: play
+  namespace: default
+  labels:
+    app: play
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: play
+  template:
+    metadata:
+      labels:
+        app: play
+    spec:
+      containers:
+      - name: play
+        image: battlesnakeio/play:latest
+        env:
+          - name: ENGINE_URL
+            value: "https://engine.battlesnake.io"
+          - name: BOARD_URL
+            value: "https://board.battlesnake.io"
+          - name: ENV
+            value: "production"
+          - name: BATTLESNAKEIO_DOMAIN
+            value: ".battlesnake.io"
+          - name: POSTGRES_HOST
+            value: "127.0.0.1"
+          - name: POSTGRES_PORT
+            value: "5432"
+          - name: POSTGRES_DB
+            value: "play"
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef: 
+                name: cloudsql-play-db-credentials
+                key: username
+                optional: false
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: cloudsql-play-db-credentials
+                key: password
+                optional: false
+          - name: BATTLESNAKEIO_GITHUB_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: github-oauth
+                key: id
+                optional: false
+          - name: BATTLESNAKEIO_GITHUB_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: github-oauth
+                key: secret
+                optional: false
+          - name: BATTLESNAKEIO_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: battlesnake-secret
+                key: secret
+                optional: false
+        ports:
+        - containerPort: 8000
+      - name: cloudsql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.11
+        command: ["/cloud_sql_proxy",
+                  "-instances=battlesnake-io:us-west1:battlesnake-play=tcp:5432",
+                  "-credential_file=/secrets/cloudsql/credentials.json"]
+        volumeMounts:
+          - name: cloudsql-instance-credentials
+            mountPath: /secrets/cloudsql
+            readOnly: true
+      volumes:
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-play-instance-credentials
+
