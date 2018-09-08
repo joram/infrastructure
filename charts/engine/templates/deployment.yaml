@@ -18,9 +18,20 @@ spec:
         app: engine
     spec:
       containers:
-      - name: engine
-        image: battlesnakeio/engine:0.1.5
-        command: ["/bin/engine"]
-        args: [ "server", "-l", ":3002", "-t", "100", "-b", "redis", "-a", "redis://redis:6379"]
-        ports:
-        - containerPort: 3002
+        - name: engine
+          image: battlesnakeio/engine:0.1.6
+          command: ["/bin/engine"]
+          args:
+            [
+              "server",
+              "-l",
+              ":3002",
+              "-t",
+              "100",
+              "-b",
+              "redis",
+              "-a",
+              "redis://redis:6379",
+            ]
+          ports:
+            - containerPort: 3002
