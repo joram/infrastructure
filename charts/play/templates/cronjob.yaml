@@ -1,0 +1,17 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: game-status-job
+              image: battlesnakeio/play:latest
+              args:
+                - /app/manage.py
+                - update_game_status
+          restartPolicy: OnFailure
