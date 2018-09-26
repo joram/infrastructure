@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: hello
+  name: "update-game-status"
 spec:
   schedule: "*/1 * * * *"
   jobTemplate:
@@ -11,7 +11,69 @@ spec:
           containers:
             - name: game-status-job
               image: battlesnakeio/play:latest
-              args:
+              command:
                 - /app/manage.py
+              args:
                 - update_game_status
+              env:
+                - name: ENGINE_URL
+                  value: "https://engine.battlesnake.io"
+                - name: BOARD_URL
+                  value: "https://board.battlesnake.io"
+                - name: ENV
+                  value: "production"
+                - name: BATTLESNAKEIO_DOMAIN
+                  value: ".battlesnake.io"
+                - name: POSTGRES_HOST
+                  value: "127.0.0.1"
+                - name: POSTGRES_PORT
+                  value: "5432"
+                - name: POSTGRES_DB
+                  value: "play"
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: cloudsql-play-db-credentials
+                      key: username
+                      optional: false
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: cloudsql-play-db-credentials
+                      key: password
+                      optional: false
+                - name: BATTLESNAKEIO_GITHUB_CLIENT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: github-oauth
+                      key: id
+                      optional: false
+                - name: BATTLESNAKEIO_GITHUB_CLIENT_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: github-oauth
+                      key: secret
+                      optional: false
+                - name: BATTLESNAKEIO_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: battlesnake-secret
+                      key: secret
+                      optional: false
+            - name: cloudsql-proxy
+              image: gcr.io/cloudsql-docker/gce-proxy:1.11
+              command:
+                [
+                  "/cloud_sql_proxy",
+                  "-instances=battlesnake-io:us-west1:battlesnake-play=tcp:5432",
+                  "-credential_file=/secrets/cloudsql/credentials.json",
+                ]
+              volumeMounts:
+                - name: cloudsql-instance-credentials
+                  mountPath: /secrets/cloudsql
+                  readOnly: true
+          volumes:
+            - name: cloudsql-instance-credentials
+              secret:
+                secretName: cloudsql-play-instance-credentials
           restartPolicy: OnFailure
