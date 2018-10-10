@@ -1,0 +1,12 @@
+images:
+    tag:
+        alertmanager: 2.2
+        grafana: 2.2
+        debian9: 2.2
+        kubestatemetrics: 2.2
+        nodeexporter: 2.2
+        prometheus: 2.2
+application:
+    version: 2.2
+grafana:
+    url: grafana.battlesnake.io

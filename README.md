@@ -115,8 +115,7 @@ Go to the cert-manager folder in charts then do:
 
 ```
 kubectl apply -f clusterissuer.yaml
-```
-
+``` 
 #### Deploy the test app
 
 Go to the charts folder and do:
@@ -124,6 +123,24 @@ Go to the charts folder and do:
 ```
 helm install --name test test --set domain=yourdomain.com
 ```
+
+#### Monitoring - Prometheus & Grafana
+
+- Create the namespace monitoring.
+
+
+    Do a `terraform init` and `terraform apply` in the following folder:
+
+    - [/gcp/us-west1/production/k8s_namespaces](/gcp/us-west1/production/k8s_namespaces)
+
+- Deploy the helm chart after modifying the values to reflect your environment.
+
+    In the chart folder:
+    ```
+    helm install --name monitoring monitoring --namespace monitoring
+    ```
+
+- You can retrieve the password to connect to grafana into the google cloud interface under Kubernetes Engine, Application, prometheus
 
 #### Upgrading an app
 

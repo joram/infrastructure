@@ -1,0 +1,203 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-grafana-ini
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: grafana
+data:
+  grafana.ini: |
+    [analytics]
+    check_for_updates = true
+    [grafana_net]
+    url = https://grafana.net
+    [log]
+    mode = console
+    [paths]
+    data = /var/lib/grafana/data
+    logs = /var/log/grafana
+    plugins = /var/lib/grafana/plugins
+    [server]
+    root_url =  https://{{ .Values.grafana.url }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-grafana-datasources
+  labels:
+    app.kubernetes.io/name: prometheus
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+    - access: proxy
+      isDefault: true
+      name: prometheus
+      type: prometheus
+      url: http://prometheus-prometheus:9090
+      version: 1
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-grafana-dashboardproviders
+  labels:
+    app.kubernetes.io/name: prometheus
+data:
+  dashboardproviders.yaml: |
+    apiVersion: 1
+    providers:
+    - disableDeletion: false
+      editable: true
+      folder: ""
+      name: default
+      options:
+        path: /var/lib/grafana/dashboards
+      orgId: 1
+      type: file
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: grafana
+  annotations:
+    # Creates a dns entry
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.grafana.url }}.
+    # Creates a lets encrypt certificate
+    kubernetes.io/tls-acme: "true"
+    # Defined which ingress controller we want to use when multiple are available
+    kubernetes.io/ingress.class: "nginx"
+    # Redirect all traffic to ssl
+    ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - {{ .Values.grafana.url }}
+    secretName: grafana-tls
+  rules:
+  - host: {{ .Values.grafana.url }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: prometheus-grafana
+          servicePort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-grafana
+  labels:
+    k8s-app: grafana
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: grafana
+spec:
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 3000
+  selector:
+    k8s-app: grafana
+---
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: prometheus-grafana
+  labels: &Labels
+    k8s-app: grafana
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: grafana
+spec:
+  serviceName: prometheus-grafana
+  replicas: 1
+  selector:
+    matchLabels: *Labels
+  template:
+    metadata:
+      labels: *Labels
+    spec:
+      serviceAccountName: monitoring-serviceaccount
+      initContainers:
+          - name: "init-chmod-data"
+            image: marketplace.gcr.io/google/prometheus/debian9:{{ .Values.images.tag.debian9 }}
+            imagePullPolicy: "IfNotPresent"
+            command: ["chmod", "777", "/var/lib/grafana"]
+            volumeMounts:
+            - name: prometheus-grafana-data
+              mountPath: "/var/lib/grafana"
+      containers:
+        - name: grafana
+          image: marketplace.gcr.io/google/prometheus/grafana:{{ .Values.images.tag.grafana }}
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: config
+              mountPath: "/etc/grafana/"
+            - name: dashboards
+              mountPath: "/var/lib/grafana/dashboards"
+            - name: datasources
+              mountPath: "/etc/grafana/provisioning/datasources/"
+            - name: dashboardproviders
+              mountPath: "/etc/grafana/provisioning/dashboards/"
+            - name: prometheus-grafana-data
+              mountPath: "/var/lib/grafana"
+          ports:
+            - name: service
+              containerPort: 80
+              protocol: TCP
+            - name: grafana
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: GF_SECURITY_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: prometheus-grafana
+                  key: admin-user
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: prometheus-grafana
+                  key: admin-password
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 60
+            timeoutSeconds: 30
+            failureThreshold: 10
+            periodSeconds: 10
+          resources:
+            limits:
+              cpu: 50m
+              memory: 100Mi
+            requests:
+              cpu: 50m
+              memory: 100Mi
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-grafana-ini
+        - name: datasources
+          configMap:
+            name: prometheus-grafana-datasources
+        - name: dashboardproviders
+          configMap:
+            name: prometheus-grafana-dashboardproviders
+        - name: dashboards
+          configMap:
+            name: prometheus-dashboards
+  volumeClaimTemplates:
+  - metadata:
+      name: prometheus-grafana-data
+    spec:
+      storageClassName: standard
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: "2Gi"
