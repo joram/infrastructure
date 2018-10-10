@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: engine
-          image: battlesnakeio/engine:0.1.6
+          image: battlesnakeio/engine:0.2.1
           command: ["/bin/engine"]
           args:
             [
