@@ -8,6 +8,7 @@ spec:
     spec:
       template:
         spec:
+          concurrencyPolicy: Forbid
           containers:
             - name: game-status-job
               image: battlesnakeio/play:latest
@@ -25,7 +26,7 @@ spec:
                 - name: BATTLESNAKEIO_DOMAIN
                   value: ".battlesnake.io"
                 - name: POSTGRES_HOST
-                  value: "127.0.0.1"
+                  value: "sqlproxy-gcloud-sqlproxy"
                 - name: POSTGRES_PORT
                   value: "5432"
                 - name: POSTGRES_DB
@@ -60,20 +61,4 @@ spec:
                       name: battlesnake-secret
                       key: secret
                       optional: false
-            - name: cloudsql-proxy
-              image: gcr.io/cloudsql-docker/gce-proxy:1.11
-              command:
-                [
-                  "/cloud_sql_proxy",
-                  "-instances=battlesnake-io:us-west1:battlesnake-play=tcp:5432",
-                  "-credential_file=/secrets/cloudsql/credentials.json",
-                ]
-              volumeMounts:
-                - name: cloudsql-instance-credentials
-                  mountPath: /secrets/cloudsql
-                  readOnly: true
-          volumes:
-            - name: cloudsql-instance-credentials
-              secret:
-                secretName: cloudsql-play-instance-credentials
-          restartPolicy: OnFailure
+          restartPolicy: Never
