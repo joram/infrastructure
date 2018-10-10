@@ -69,3 +69,18 @@ resource "kubernetes_secret" "battlesnake-secret" {
     secret   = "${random_id.battlesnake-secret.hex}"
   }
 }
+
+resource "random_id" "grafana-secret" {
+  byte_length = 32
+}
+
+resource "kubernetes_secret" "grapafana-secret" {
+  metadata {
+    name              = "prometheus-grafana"
+    namespace         = "monitoring"
+  }
+  data {
+    admin-user       = "admin"
+    admin-password   = "${random_id.grafana-secret.hex}"
+  }
+}
