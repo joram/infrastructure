@@ -70,6 +70,39 @@ resource "kubernetes_secret" "battlesnake-secret" {
   }
 }
 
+resource "kubernetes_secret" "cloudsql-engine-instance-credentials" {
+  metadata {
+    name               = "cloudsql-engine-instance-credentials"
+    namespace          = "default"
+  }
+  data {
+    "credentials.json" = "${base64decode(data.terraform_remote_state.sql.cloudsqlproxy-engine-service-account-private-key)}"
+  }
+}
+
+resource "kubernetes_secret" "cloudsql-engine-db-credentials" {
+  metadata {
+    name       = "cloudsql-engine-db-credentials"
+    namespace  = "default"
+  }
+  data {
+    username   = "${data.terraform_remote_state.sql.db_user_name_engine}"
+    password   = "${data.terraform_remote_state.sql.generated_user_password_engine}"
+  }
+}
+
+resource "kubernetes_secret" "cloudsql-engine-db-config" {
+  metadata {
+    name              = "cloudsql-engine-db-config"
+    namespace         = "default"
+  }
+  data {
+    connection_name   = "${data.terraform_remote_state.sql.connection_name_engine}"
+    instance_address  = "${data.terraform_remote_state.sql.instance_address_engine}"
+    instance_name     = "${data.terraform_remote_state.sql.instance_name_engine}"
+  }
+}
+  
 resource "random_id" "grafana-secret" {
   byte_length = 32
 }

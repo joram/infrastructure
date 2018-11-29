@@ -115,7 +115,32 @@ Go to the cert-manager folder in charts then do:
 
 ```
 kubectl apply -f clusterissuer.yaml
-``` 
+```
+
+- To allow play to connect to the db 
+
+```
+helm upgrade sqlproxy stable/gcloud-sqlproxy --namespace default \
+--set existingSecret="cloudsql-play-instance-credentials" \
+--set existingSecretKey="credentials.json" \
+--set cloudsql.instances[0].instance="battlesnake-play" \
+--set cloudsql.instances[0].project="battlesnake-io" \
+--set cloudsql.instances[0].region="us-west1" \
+--set cloudsql.instances[0].port=5432 -i
+```
+
+- To allow engine to connect to the db 
+
+```
+helm upgrade sqlproxy-engine stable/gcloud-sqlproxy --namespace default \
+--set existingSecret="cloudsql-engine-instance-credentials" \
+--set existingSecretKey="credentials.json" \
+--set cloudsql.instances[0].instance="battlesnake-engine" \
+--set cloudsql.instances[0].project="battlesnake-io" \
+--set cloudsql.instances[0].region="us-west1" \
+--set cloudsql.instances[0].port=5432 -i
+```
+
 #### Deploy the test app
 
 Go to the charts folder and do:
