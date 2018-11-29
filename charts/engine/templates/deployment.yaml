@@ -19,7 +19,26 @@ spec:
     spec:
       containers:
         - name: engine
-          image: battlesnakeio/engine:0.2.2
+          image: battlesnakeio/engine:0.2.3
+          env:
+          - name: POSTGRES_HOST
+            value: "sqlproxy-engine-gcloud-sqlproxy"
+          - name: POSTGRES_PORT
+            value: "5432"
+          - name: POSTGRES_DB
+            value: "engine"
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: cloudsql-engine-db-credentials
+                key: username
+                optional: false
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: cloudsql-engine-db-credentials
+                key: password
+                optional: false
           command: ["/bin/engine"]
           args:
             [
@@ -29,9 +48,9 @@ spec:
               "-t",
               "100",
               "-b",
-              "redis",
+              "sql",
               "-a",
-              "redis://redis:6379",
+              "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable",
             ]
           ports:
             - containerPort: 3002
