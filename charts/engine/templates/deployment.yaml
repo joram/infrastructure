@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: engine
-          image: battlesnakeio/engine:0.2.3
+          image: battlesnakeio/engine:0.2.4
           env:
           - name: POSTGRES_HOST
             value: "sqlproxy-engine-gcloud-sqlproxy"
@@ -46,7 +46,7 @@ spec:
               "-l",
               ":3002",
               "-t",
-              "100",
+              "1",
               "-b",
               "sql",
               "-a",
@@ -54,3 +54,37 @@ spec:
             ]
           ports:
             - containerPort: 3002
+            - containerPort: 3004
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: engine-worker
+  namespace: default
+  labels:
+    app: engine
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: engine
+  template:
+    metadata:
+      labels:
+        app: engine
+    spec:
+      containers:
+        - name: engine
+          image: battlesnakeio/engine:0.2.4
+          command: ["/bin/engine"]
+          args:
+            [
+              "server",
+              "worker",
+              "-c",
+              "engine:3004",
+              "-t",
+              "50",
+            ]

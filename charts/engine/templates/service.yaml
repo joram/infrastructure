@@ -11,3 +11,7 @@ spec:
       protocol: 'TCP'
       port: 80
       targetPort: 3002
+    - name: controller
+      protocol: 'TCP'
+      port: 3004
+      targetPort: 3004
