@@ -6,7 +6,7 @@ module "postgresql-engine" {
   name                        = "battlesnake-engine"
   database_version            = "POSTGRES_9_6"
   region                      = "us-west1"
-  tier                        = "db-custom-2-4096" # 2 CPU, 4GB ram
+  tier                        = "db-custom-2-8192" # 2 CPU, 8GB ram
   activation_policy           = "ALWAYS"
   availability_type           = "REGIONAL"
   disk_autoresize             = "true"
