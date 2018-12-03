@@ -6,9 +6,27 @@ metadata:
   labels:
     app: play
 spec:
-  replicas: 1
+  replicas: 2
+  template:
+    metadata:
+    labels:
+        app: play
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                    - play
+              topologyKey: "kubernetes.io/hostname"
   strategy:
     type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 2
   selector:
     matchLabels:
       app: play
@@ -67,3 +85,10 @@ spec:
                 optional: false
         ports:
         - containerPort: 8000
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: 500M
+          requests:
+            cpu: "0.5"
+            memory: 500M
