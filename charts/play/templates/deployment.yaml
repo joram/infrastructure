@@ -37,7 +37,7 @@ spec:
     spec:
       containers:
       - name: play
-        image: battlesnakeio/play:latest
+        image: battlesnakeio/play:{{ .Values.release }}
         env:
           - name: ENGINE_URL
             value: "https://engine.battlesnake.io"

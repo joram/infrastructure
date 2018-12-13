@@ -21,50 +21,50 @@ spec:
         app: engine
     spec:
       containers:
-        - name: engine
-          image: battlesnakeio/engine:0.2.4
-          env:
-          - name: POSTGRES_HOST
-            value: "sqlproxy-engine-gcloud-sqlproxy"
-          - name: POSTGRES_PORT
-            value: "5432"
-          - name: POSTGRES_DB
-            value: "engine"
-          - name: POSTGRES_USER
-            valueFrom:
-              secretKeyRef:
-                name: cloudsql-engine-db-credentials
-                key: username
-                optional: false
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: cloudsql-engine-db-credentials
-                key: password
-                optional: false
-          command: ["/bin/engine"]
-          args:
-            [
-              "server",
-              "-l",
-              ":3002",
-              "-t",
-              "1",
-              "-b",
-              "sql",
-              "-a",
-              "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable",
-            ]
-          resources:
-            limits:
-              cpu: "1"
-              memory: 750M
-            requests:
-              cpu: "0.5"
-              memory: 500M
-          ports:
-            - containerPort: 3002
-            - containerPort: 3004
+      - name: engine
+        image: battlesnakeio/engine:{{ .Values.release }}
+        env:
+        - name: POSTGRES_HOST
+          value: "sqlproxy-engine-gcloud-sqlproxy"
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: "engine"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: cloudsql-engine-db-credentials
+              key: username
+              optional: false
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cloudsql-engine-db-credentials
+              key: password
+              optional: false
+        command: ["/bin/engine"]
+        args:
+          [
+            "server",
+            "-l",
+            ":3002",
+            "-t",
+            "1",
+            "-b",
+            "sql",
+            "-a",
+            "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable",
+          ]
+        resources:
+          limits:
+            cpu: "1"
+            memory: 750M
+          requests:
+            cpu: "0.5"
+            memory: 500M
+        ports:
+          - containerPort: 3002
+          - containerPort: 3004
 ---
 apiVersion: apps/v1beta2
 kind: Deployment
@@ -89,22 +89,22 @@ spec:
         app: engine-worker
     spec:
       containers:
-        - name: engine
-          image: battlesnakeio/engine:0.2.4
-          command: ["/bin/engine"]
-          args:
-            [
-              "server",
-              "worker",
-              "-c",
-              "engine:3004",
-              "-t",
-              "50",
-            ]
-        resources:
-          limits:
-            cpu: "1"
-            memory: 750M
-          requests:
-            cpu: "0.5"
-            memory: 500M
+      - name: engine
+        image: battlesnakeio/engine:{{ .Values.release }}
+        command: ["/bin/engine"]
+        args:
+          [
+            "server",
+            "worker",
+            "-c",
+            "engine:3004",
+            "-t",
+            "50",
+          ]
+      resources:
+        limits:
+          cpu: "1"
+          memory: 750M
+        requests:
+          cpu: "0.5"
+          memory: 500M

@@ -17,7 +17,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             - labelSelector:
                 matchExpressions:
-                  - key: "app"
+                  - key: "board"
                     operator: In
                     values:
                     - board
@@ -37,7 +37,7 @@ spec:
     spec:
       containers:
       - name: board
-        image: battlesnakeio/board:latest
+        image: battlesnakeio/board:{{ .Values.release }}
         ports:
         - containerPort: 80
       resources:

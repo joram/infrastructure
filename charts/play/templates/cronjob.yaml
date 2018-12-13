@@ -11,7 +11,7 @@ spec:
           concurrencyPolicy: Forbid
           containers:
             - name: game-status-job
-              image: battlesnakeio/play:latest
+              image: battlesnakeio/play:{{ .Values.release }}
               command:
                 - /app/manage.py
               args:
